@@ -1,0 +1,8 @@
+.DS_Store
+node_modules
+cli/**/*.js
+cli/**/*.map
+cli/**/*.d.ts
+lib/**/*.js
+lib/**/*.map
+lib/**/*.d.ts
