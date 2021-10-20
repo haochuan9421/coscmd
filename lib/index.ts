@@ -31,6 +31,20 @@ export interface SingleClientConfig extends BucketParams, COSOptions {
 }
 export type ClientConfig = SingleClientConfig | SingleClientConfig[];
 
+export type FileRes = {
+  rPath: string; // 本地的相对路径
+  fullPath: string; // 本地绝对路径
+  cosKey: string; // COS Key
+  cosResult: any; // COS 返回的上传结果
+  cosError: null | Error; // COS 返回的错误
+  url: string; // 上传后的访问地址
+};
+// upload 方法的返回值类型
+export type UploadRes = {
+  files: FileRes[];
+  startTime: number;
+  endTime: number;
+};
 export interface SingleUploadConfig {
   source: string; // 本地资源，支持单文件、文件夹、glob 表达式
   cwd?: string; // 查找 source 时的工作目录，默认是 process.cwd()
@@ -41,6 +55,8 @@ export interface SingleUploadConfig {
   cdnPurgeCache?: boolean | Omit<PurgeUrlsCacheRequest, "Urls">; // 是否刷新 CDN 缓存
   cdnPushCache?: boolean | Omit<PushUrlsCacheRequest, "Urls">; // 是否预热 CDN 缓存
   dryRun?: boolean; // 只模拟上传过程，不实际上传
+  preUpload?: (files: Pick<FileRes, "rPath" | "fullPath" | "cosKey">[]) => Promise<void>; // 开始上传前的钩子
+  postUpload?: (uploadRes: UploadRes) => Promise<void>; // 上传完成后的钩子
 }
 export type UploadConfig = SingleUploadConfig | SingleUploadConfig[];
 
@@ -127,21 +143,6 @@ export type cosRewriteMethodNames =
       [P in keyof COS]: Parameters<COS[P]>[0] extends BucketParams ? P : never;
     }[keyof COS]
   | "uploadFiles";
-
-export type FileRes = {
-  rPath: string; // 本地的相对路径
-  fullPath: string; // 本地绝对路径
-  cosKey: string; // COS Key
-  cosResult: any; // COS 返回的上传结果
-  cosError: null | Error; // COS 返回的错误
-  url: string; // 上传后的访问地址
-};
-// upload 方法的返回值类型
-export type UploadRes = {
-  files: FileRes[];
-  startTime: number;
-  endTime: number;
-};
 
 export class Client {
   static cosProxiedMethods: cosRewriteMethodNames[] = [
@@ -367,6 +368,8 @@ export class Client {
         cdnPurgeCache,
         cdnPushCache,
         dryRun,
+        preUpload,
+        postUpload,
       } = uploadConfig;
 
       if (!source) {
@@ -449,6 +452,10 @@ export class Client {
       }
 
       debug(`upload "source" total count is ${files.length}`);
+
+      if (typeof preUpload === "function") {
+        await preUpload(files);
+      }
 
       if (dryRun) {
         uploadRes.files = files.map(({ rPath, fullPath, cosKey }) => ({
@@ -550,10 +557,11 @@ export class Client {
         }
       }
 
-      return {
-        ...uploadRes,
-        endTime: Date.now(),
-      };
+      uploadRes.endTime = Date.now();
+      if (typeof postUpload === "function") {
+        await postUpload(uploadRes);
+      }
+      return uploadRes;
     } catch (error) {
       debug(`upload fail`, error);
       throw error;

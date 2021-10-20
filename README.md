@@ -213,6 +213,8 @@ export interface SingleUploadConfig {
   cdnPurgeCache?: boolean | Omit<PurgeUrlsCacheRequest, "Urls">; // 是否刷新 CDN 缓存
   cdnPushCache?: boolean | Omit<PushUrlsCacheRequest, "Urls">; // 是否预热 CDN 缓存
   dryRun?: boolean; // 只模拟上传过程，不实际上传
+  preUpload?: (files: Pick<FileRes, "rPath" | "fullPath" | "cosKey">[]) => Promise<void>; // 开始上传前的钩子
+  postUpload?: (uploadRes: UploadRes) => Promise<void>; // 上传完成后的钩子
 }
 export type UploadConfig = SingleUploadConfig | SingleUploadConfig[];
 ```
