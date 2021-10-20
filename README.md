@@ -48,7 +48,7 @@ cos up dist project/foo
 # 上传本地 dist 文件夹下的全部 html、js、css 文件到 COS 的 project/foo 路径下
 cos up 'dist/**/*.@(html|js|css)' project/foo
 # 上传本地 dist 文件夹下的全部非 map 文件到 COS 的 project/foo 路径下
-cos up 'dist/**/*.!(map)' project/foo
+cos up dist project/foo --ignore 'dist/**/*.map'
 ```
 
 ## 配置介绍
@@ -67,7 +67,8 @@ module.exports = {
     cdn: { domain: "file.example.com" }, // 与 COS 关联的 CDN 的配置（未关联可不填）
   },
   upload: {
-    source: "dist/**/*.!(map)", // 本地资源，支持单文件、文件夹、glob 表达式
+    source: "dist/**", // 本地资源，支持单文件、文件夹、glob 表达式
+    ignore: ["dist/**/*.map"], // 要忽略文件的 glob 表达式
     cwd: process.cwd(), // 查找 source 时的工作目录，默认是 process.cwd()
     target: "project/foo", // 保存到 COS 的路径，默认是根路径
     rename: false, // 是否对文件进行重命名，如何设置为 true 默认重命名为 16 个小写字母和数字的随机组合，设置为数字可以自定义长度
@@ -205,6 +206,7 @@ import {
 
 export interface SingleUploadConfig {
   source: string; // 本地资源，支持单文件、文件夹、glob 表达式
+  ignore: string[]; // 要忽略文件的 glob 表达式
   cwd?: string; // 查找 source 时的工作目录，默认是 process.cwd()
   target?: string; // 保存到 COS 的路径，默认是根路径
   rename?: boolean | number; // 是否对文件进行重命名，如何设置为 true 默认重命名为 16 个小写字母和数字的随机组合，设置为数字可以自定义长度
@@ -286,7 +288,8 @@ module.exports = {
   ],
   upload: [
     {
-      source: "dist/**/*.!(map)", // 不上传 map 文件
+      source: "dist/**",
+      ignore: ["dist/**/*.map"], // 不上传 map 文件
       cwd: __dirname,
       target: `project/${pkg.name}`,
       rename: false,
@@ -295,6 +298,9 @@ module.exports = {
       cdnPurgeCache: false,
       cdnPushCache: true, // 上传完成后自动预热 CDN 缓存
       dryRun: false,
+      async postUpload() {
+        // 上传结束后可以执行一些清理任务
+      },
     },
   ],
 };

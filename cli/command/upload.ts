@@ -9,6 +9,7 @@ export function install(program: Command) {
     .alias("up")
     .addArgument(new Argument("[source]", "要上传的本地资源，支持单文件、文件夹、glob 表达式"))
     .addArgument(new Argument("[target]", "保存到 COS 的路径，默认是根路径"))
+    .addOption(new Option("--ignore [ignore...]", "需要忽略的文件的 glob 表达式"))
     .addOption(
       new Option(
         "--rename [rename]",

@@ -47,6 +47,7 @@ export type UploadRes = {
 };
 export interface SingleUploadConfig {
   source: string; // 本地资源，支持单文件、文件夹、glob 表达式
+  ignore: string[]; // 要忽略文件的 glob 表达式
   cwd?: string; // 查找 source 时的工作目录，默认是 process.cwd()
   target?: string; // 保存到 COS 的路径，默认是根路径
   rename?: boolean | number; // 是否对文件进行重命名，如何设置为 true 默认重命名为 16 个小写字母和数字的随机组合，设置为数字可以自定义长度
@@ -360,6 +361,7 @@ export class Client {
       debug(`upload start`, uploadConfig);
       const {
         source,
+        ignore,
         cwd = process.cwd(),
         target = "",
         rename,
@@ -405,28 +407,30 @@ export class Client {
         } else if (stat.isDirectory()) {
           debug(`upload "source" is directory`);
           const dirname = path.relative(cwd, sourcePath);
-          files = (await promisify(glob)(`${dirname}/**`, { cwd, nodir: true, dot: true })).map((matchedPath) => {
-            const fullPath = path.resolve(cwd, matchedPath);
-            const renamedFilePath = rename
-              ? path.format({
-                  ...pick(path.parse(fullPath), ["dir", "ext"]),
-                  name: Client.randomString(rename === true ? 16 : rename),
-                })
-              : fullPath;
-            const cosKey = path.join(
-              normalizedTarget,
-              flat ? path.basename(renamedFilePath) : path.relative(sourcePath, renamedFilePath)
-            );
+          files = (await promisify(glob)(`${dirname}/**`, { cwd, nodir: true, dot: true, ignore })).map(
+            (matchedPath) => {
+              const fullPath = path.resolve(cwd, matchedPath);
+              const renamedFilePath = rename
+                ? path.format({
+                    ...pick(path.parse(fullPath), ["dir", "ext"]),
+                    name: Client.randomString(rename === true ? 16 : rename),
+                  })
+                : fullPath;
+              const cosKey = path.join(
+                normalizedTarget,
+                flat ? path.basename(renamedFilePath) : path.relative(sourcePath, renamedFilePath)
+              );
 
-            return { rPath: path.relative(cwd, fullPath), fullPath, cosKey };
-          });
+              return { rPath: path.relative(cwd, fullPath), fullPath, cosKey };
+            }
+          );
         } else {
           debug(`upload "source" not support`);
           throw new Error("unsupport file type");
         }
       } else {
         debug(`use upload "source" as glob pattern`);
-        const fullPaths = (await promisify(glob)(source, { cwd, nodir: true, dot: true })).map((matchedPath) =>
+        const fullPaths = (await promisify(glob)(source, { cwd, nodir: true, dot: true, ignore })).map((matchedPath) =>
           path.resolve(cwd, matchedPath)
         );
 
