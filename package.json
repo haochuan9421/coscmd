@@ -1,6 +1,6 @@
 {
   "name": "coscmd",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "一个上传本地文件到腾讯云对象存储（COS）的命令行工具",
   "private": false,
   "main": "lib/index.js",

@@ -6,14 +6,14 @@ import { Table } from "console-table-printer";
 
 import { getCOSCMDConfig } from "../../../../lib/index";
 
-export function install(program: Command) {
-  program
+export function install(cosProgram: Command, clientProgram: Command) {
+  clientProgram
     .command("list", { isDefault: true })
     .addOption(new Option("--detail", "查看详细信息"))
     .description("查看 COS 客户端列表")
     .action(async (opts) => {
       try {
-        const { configFile } = program.opts();
+        const { configFile } = cosProgram.opts();
         const { client } = await getCOSCMDConfig(configFile);
         const clients = client ? (isArray(client) ? client : [client]) : [];
         if (!clients.length) {
