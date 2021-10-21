@@ -23,6 +23,8 @@ export interface BucketParams {
 export interface SingleClientConfig extends BucketParams, COSOptions {
   // 是否启用这个客户端
   enable?: boolean;
+  // client 名称，当有多个客户端时可以在执行命令行时通过 --client 参数指定要使用的客户端，不指定，使用全部 enable 的客户端
+  name?: string;
   // COS 关联的 CDN 的相关配置
   cdn?: {
     domain: string; // CDN 加速域名
@@ -289,7 +291,7 @@ export class Client {
   cdn?: CDNClient;
 
   constructor(public config: SingleClientConfig) {
-    const { enable, SecretId, SecretKey, Bucket, Region, cdn, ...cosConfig } = config;
+    const { enable, name, SecretId, SecretKey, Bucket, Region, cdn, ...cosConfig } = config;
 
     // 实例化 COS
     this.cos = new Proxy(

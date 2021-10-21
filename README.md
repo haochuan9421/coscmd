@@ -101,6 +101,8 @@ export interface BucketParams {
 export interface SingleClientConfig extends BucketParams, COSOptions {
   // 是否启用这个客户端
   enable?: boolean;
+  // client 名称，当有多个客户端时可以在执行命令行时通过 --client 参数指定要使用的客户端，不指定，使用全部 enable 的客户端
+  name?: string;
   // COS 关联的 CDN 的相关配置
   cdn?: {
     domain: string; // CDN 加速域名
@@ -325,6 +327,8 @@ module.exports = {
 - 执行 `cos upload` 命令时可以添加 `--dry-run` 参数，这样 `coscmd` 只会模拟上传过程，不会实际上传文件，方便查看都有哪些文件会被上传以及上传后的位置是什么了。
 - 设置环境变量 `DEBUG=coscmd` 可以查看 `coscmd` 的详细运行日志，包括解析到的配置文件内容，以及每个文件上传时腾讯云返回的错误和响应。
 - 如果配置文件中的 `client` 数组的长度（`enable: true`）是 `m`，`upload` 数组的长度是 `n`，最终的上传任务数会是 `m * n`，也就是说，每个客户端都会把每个上传任务执行一次。
+- 当配置文件中有多个 `enable` 的客户端时，在执行命令时，可以使用 `--client` 或者 `-c` 参数指定要使用的客户端。不指定则全部 `enable` 的客户端都会生效。
+- 可以使用 `--config-file` 参数指定配置文件路径。
 
 ## Star 趋势
 

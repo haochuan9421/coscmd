@@ -24,8 +24,13 @@ export function install(program: Command) {
     .description("上传本地文件到腾讯云 COS")
     .action(async (source, target, opts) => {
       try {
-        const { client, upload } = await getCOSCMDConfig();
-        const clients = client ? (isArray(client) ? client : [client]).filter(({ enable }) => enable) : [];
+        const { configFile, client: clientName } = program.opts();
+        const { client, upload } = await getCOSCMDConfig(configFile);
+        const clients = client
+          ? (isArray(client) ? client : [client]).filter(
+              ({ enable, name }) => enable && (!clientName || name === clientName)
+            )
+          : [];
         if (!clients.length) {
           throw new Error(`缺少 COS 客户端，请先在 "cos.config.js" 文件中新增客户端`);
         }

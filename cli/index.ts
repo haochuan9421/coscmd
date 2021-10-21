@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import chalk from "chalk";
-import { Command } from "commander";
+import { Command, Option } from "commander";
 import updateNotifier from "update-notifier";
 import pkg from "../package.json";
 
@@ -14,6 +14,9 @@ updateNotifier({
 (async () => {
   const cosProgram = new Command("cos");
   cosProgram.version(pkg.version, "-v, --version");
+
+  cosProgram.addOption(new Option("--config-file [configFile]", "指定配置文件"));
+  cosProgram.addOption(new Option("-c, --client [client]", "指定要使用的 Client 的名称"));
 
   await import("./command/client").then(({ install }) => install(cosProgram));
   await import("./command/upload").then(({ install }) => install(cosProgram));

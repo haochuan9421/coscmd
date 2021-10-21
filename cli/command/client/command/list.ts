@@ -26,6 +26,7 @@ export function install(program: Command) {
           const table = new Table({
             title: "COS 客户端列表",
             columns: [
+              { name: "name", alignment: "left" },
               { name: "enable", alignment: "left" },
               { name: "Bucket", alignment: "left" },
               { name: "Region", alignment: "left" },
@@ -34,6 +35,7 @@ export function install(program: Command) {
           });
           table.addRows(
             clients.map((client) => ({
+              name: client.name,
               enable: !!client.enable,
               Bucket: client.Bucket,
               Region: client.Region,
