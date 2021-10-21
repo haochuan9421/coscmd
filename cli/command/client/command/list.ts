@@ -13,7 +13,8 @@ export function install(program: Command) {
     .description("查看 COS 客户端列表")
     .action(async (opts) => {
       try {
-        const { client } = await getCOSCMDConfig();
+        const { configFile } = program.opts();
+        const { client } = await getCOSCMDConfig(configFile);
         const clients = client ? (isArray(client) ? client : [client]) : [];
         if (!clients.length) {
           console.log(red(`缺少 COS 客户端，请先在 "cos.config.js" 文件中新增客户端`));
