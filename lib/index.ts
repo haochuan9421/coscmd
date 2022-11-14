@@ -401,7 +401,7 @@ export class Client {
             const cosKey =
               parsed.ext === path.extname(normalizedTarget)
                 ? normalizedTarget
-                : path.join(
+                : path.posix.join(
                     normalizedTarget,
                     `${rename ? Client.randomString(rename === true ? 16 : rename) : parsed.name}${parsed.ext}`
                   );
@@ -420,7 +420,7 @@ export class Client {
                     name: Client.randomString(rename === true ? 16 : rename),
                   })
                 : fullPath;
-              const cosKey = path.join(
+              const cosKey = path.posix.join(
                 normalizedTarget,
                 flat ? path.basename(renamedFilePath) : path.relative(sourcePath, renamedFilePath)
               );
@@ -450,7 +450,7 @@ export class Client {
                   name: Client.randomString(rename === true ? 16 : rename),
                 })
               : fullPath;
-            const cosKey = path.join(
+            const cosKey = path.posix.join(
               normalizedTarget,
               flat ? path.basename(renamedFilePath) : path.relative(commonDir, renamedFilePath)
             );
