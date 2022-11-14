@@ -79,10 +79,12 @@ const debug = DEBUG("coscmd");
 export async function getCOSCMDConfig(configFile?: string): Promise<COSCMDConfig> {
   try {
     debug(`getCOSCMDConfig start`);
-    const configFileName = "cos.config.js";
+    const configFileNames = ["cos.config.js", ".cosconfigrc"];
     const configFiles = configFile
       ? [path.resolve(configFile)]
-      : [path.join(os.homedir(), configFileName), path.join(process.cwd(), configFileName)];
+      : configFileNames
+          .map((configFileName) => [path.join(os.homedir(), configFileName), path.join(process.cwd(), configFileName)])
+          .flat();
     const config = await configFiles.reduce(async (promise, file) => {
       try {
         const exists = fs.existsSync(file);
