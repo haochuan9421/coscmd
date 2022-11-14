@@ -79,11 +79,11 @@ const debug = DEBUG("coscmd");
 export async function getCOSCMDConfig(configFile?: string): Promise<COSCMDConfig> {
   try {
     debug(`getCOSCMDConfig start`);
-    const configFileNames = ["cos.config.js", ".cosconfigrc"];
+    const configFileNames = [".cosconfigrc", "cos.config.js"]; // 后面的优先级高
     const configFiles = configFile
       ? [path.resolve(configFile)]
-      : configFileNames
-          .map((configFileName) => [path.join(os.homedir(), configFileName), path.join(process.cwd(), configFileName)])
+      : [os.homedir(), process.cwd()]
+          .map((base) => configFileNames.map((configFileName) => path.join(base, configFileName)))
           .flat();
     const config = await configFiles.reduce(async (promise, file) => {
       try {
