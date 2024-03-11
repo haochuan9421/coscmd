@@ -79,7 +79,7 @@ const debug = DEBUG("coscmd");
 export async function getCOSCMDConfig(configFile?: string): Promise<COSCMDConfig> {
   try {
     debug(`getCOSCMDConfig start`);
-    const configFileNames = [".cosconfigrc", "cos.config.js"]; // 后面的优先级高
+    const configFileNames = [".cosconfigrc", "cos.config.js", "cos.config.cjs"]; // 后面的优先级高
     const configFiles = configFile
       ? [path.resolve(configFile)]
       : [os.homedir(), process.cwd()]
